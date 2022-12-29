@@ -1,0 +1,25 @@
+# docker run --name mariadbtest2 -v ~/dev/docker/dbmaria:/var/lib/mysql -e MYSQL_ROOT_PASSWORD=MYsql -p 127.0.0.1:3310:3306 -d docker.io/library/mariadb:10.3
+
+version: "3.9"
+services:
+  database:
+    image: 'mariadb:10.3'
+    container_name: database
+    restart: always
+    command: --default-authentification-plugin=mysql_native_password
+    environment:
+      MYSQL_DATABASE: ASL
+      MYSQL_ROOT_PASSWORD: MYsql
+      
+    ports:
+        - '3310:3306'
+    volumes:
+        #- ${PWD}/mdbdata:/var/lib/mysql
+        - ~/dev/docker/mdbdata:/var/lib/mysql
+
+  web:
+    build: .
+    ports:
+      - "5000:5000"
+    volumes:
+      - .:/app

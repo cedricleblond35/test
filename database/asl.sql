@@ -83,6 +83,7 @@ START TRANSACTION;
 USE `ASL`;
 INSERT INTO `ASL`.`role` (`id`, `name`) VALUES (DEFAULT, 'admin');
 INSERT INTO `ASL`.`role` (`id`, `name`) VALUES (DEFAULT, 'customer');
+INSERT INTO `ASL`.`user` (`id`, `name`, `lastname`, `email`, `password`, `role_id`) VALUES (DEFAULT, 'eva', 'iliza', 'adminasl@gmail.com', 'c4de7df1bafd6d9b8f5d35d4328c93b0', 1);
 
 COMMIT;
 
