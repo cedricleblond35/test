@@ -27,35 +27,6 @@ Session(app)
 
 s = requests.Session()
 
-try:
-  cnx = mysql.connector.connect(
-            host="0.0.0.0",
-            port=3310,
-            user="root",
-            passwd="MYsql",
-            database="ASL")
-  cursor = cnx.cursor()
-  
-  print("eeeeeeeeeeeeeeeeeeeeeeeee :")
-  cursor.execute("SELECT name, lastname FROM user")
-  res = cursor.fetchall()
-  for raw in res:
-    print (raw[0], raw[1])
-
-#   for (name, lastname) in cursor:
-#     print("name :", name, lastname)
-
-
-  cnx.close()
-except mysql.connector.Error as e:
-    print("Error code:", e.errno)         # error number
-    print("SQLSTATE value:", e.sqlstate) # SQLSTATE value
-    print("Error message:", e.msg)       # error message
-    print("Error:", e)                   # errno, sqlstate, msg values
-    s = str(e)
-    print("Error:", s)                   # errno, sqlstate, msg values
-
-
 
 def connector():
     try:
@@ -197,21 +168,18 @@ def deconnection():
 def login():
     try:
         if request.method == 'POST' and 'email' in request.form and 'password' in request.form:
-            # Create variables for easy access
             email = request.form['email'].strip()
             pwd = request.form['password'].strip()
             pwd = hashlib.md5(pwd.encode()).hexdigest()
             
             admin = Admin()
             res = admin.identification(email, pwd)
-            print("quantite2 :", len(res) )
             for raw in res:
                 print (raw[0], raw[1])
                 session['name'] = raw[0]
                 session['email'] = raw[1]
                 session['role'] = raw[2]
                 return redirect(url_for('cam', code=302))
-
 
     except OSError as err:
         print("OS error: {0}".format(err))
@@ -227,29 +195,24 @@ def login():
 @app.route('/create_user/', methods=['GET', 'POST'])
 def create_user():
     admin = Admin()
-
     try:
-
         if request.method == 'POST' and 'email' in request.form and 'password' in request.form:
-
-            # cur = connector()
-            # Create variables for easy access
             name = request.form['name'].strip()
             lastname = request.form['lastname'].strip()
             email = request.form['email'].strip()
             pwd = request.form['password'].strip()
-            doneUser = request.form['doneUser'].strip()
             pwd = hashlib.md5(pwd.encode()).hexdigest()
-            print("mot de passe :", pwd)
             role = request.form['role']
-            print("email :", email)
-            print("#### insert")
+            
             r = admin.createUser(name, lastname, email, pwd, role)
             print("retour insert : ", r)
-            if doneUser == "1":
+
+            # inscription for user
+            if "doneUser" in request.form:
                 session['name'] = name
                 session['email'] = email
-                session['role'] = 1
+                session['role'] = role
+            
                 return redirect(url_for('cam', code=302))
 
             return render_template('list_user.html')
@@ -265,69 +228,68 @@ def create_user():
     return render_template('create_user.html', roles=req)
 
 
-# @app.route('/update_user/', methods=['GET', 'POST'])
-# def update_user():
-#     cur = connector()
-#     try:
-#         if request.method == 'POST' and 'email' in request.form and 'password' in request.form:
-#             id = request.form['id'].strip()
-#             name = request.form['name'].strip()
-#             lastname = request.form['lastname'].strip()
-#             email = request.form['email'].strip()
-#             pwd = request.form['password'].strip()
-#             pwd = hashlib.md5(pwd.encode()).hexdigest()
-#             print("mot de passe :", pwd)
-#             role = request.form['role']
-#             print("email :", email)
-#
-#             # connexion à la BDD mySql
-#
-#             print("#### update")
-#             updateUser(cur, id, name, lastname, email, pwd, role)
-#             # Select all info the movies
-#             # titlesdb = get_movie_titles(connect)
-#             msg = ''
-#             return render_template('modification_user.html', msg='')
-#
-#     except OSError as err:
-#         print("OS error: {0}".format(err))
-#     except ValueError:
-#         print("Could not convert data to an integer.")
-#     except BaseException as err:
-#         print(f"Unexpected {err=}, {type(err)=}")
-#
-#     return render_template('create_user.html', roles=cur.fetchall())
-#
-#
-# @app.route('/delete_user/', methods=['GET', 'POST'])
-# def delete_user():
-#     cur = connector()
-#     try:
-#         if request.method == 'POST' and 'id' in request.form:
-#             id = request.form['id'].strip()
-#
-#             print("#### delete")
-#             deleteUser(cur, id)
-#             # Select all info the movies
-#             # titlesdb = get_movie_titles(connect)
-#             msg = ''
-#             return render_template('modification_user.html', msg='')
-#
-#     except OSError as err:
-#         print("OS error: {0}".format(err))
-#     except ValueError:
-#         print("Could not convert data to an integer.")
-#     except BaseException as err:
-#         print(f"Unexpected {err=}, {type(err)=}")
-#     raise
-#
-#
-# @app.route('/list_user/', methods=['GET', 'POST'])
-# def list_user():
-#     cur = connector()
-#     cur.execute("SELECT * FROM user")
-#     return render_template('list_user.html', roles=cur.fetchall())
-#
+@app.route('/update_user/', methods=['GET', 'POST'])
+def update_user():
+    cur = connector()
+    try:
+        if request.method == 'POST' and 'email' in request.form and 'password' in request.form:
+            id = request.form['id'].strip()
+            name = request.form['name'].strip()
+            lastname = request.form['lastname'].strip()
+            email = request.form['email'].strip()
+            pwd = request.form['password'].strip()
+            pwd = hashlib.md5(pwd.encode()).hexdigest()
+            print("mot de passe :", pwd)
+            role = request.form['role']
+            print("email :", email)
+
+            # connexion à la BDD mySql
+
+            print("#### update")
+            updateUser(cur, id, name, lastname, email, pwd, role)
+            # Select all info the movies
+            # titlesdb = get_movie_titles(connect)
+            msg = ''
+            return render_template('modification_user.html', msg='')
+
+    except OSError as err:
+        print("OS error: {0}".format(err))
+    except ValueError:
+        print("Could not convert data to an integer.")
+    except BaseException as err:
+        print(f"Unexpected {err=}, {type(err)=}")
+
+    return render_template('create_user.html', roles=cur.fetchall())
+
+
+@app.route('/delete_user/', methods=['GET', 'POST'])
+def delete_user():
+    cur = connector()
+    try:
+        if request.method == 'POST' and 'id' in request.form:
+            id = request.form['id'].strip()
+
+            print("#### delete")
+            deleteUser(cur, id)
+            # Select all info the movies
+            # titlesdb = get_movie_titles(connect)
+            msg = ''
+            return render_template('modification_user.html', msg='')
+
+    except OSError as err:
+        print("OS error: {0}".format(err))
+    except ValueError:
+        print("Could not convert data to an integer.")
+    except BaseException as err:
+        print(f"Unexpected {err=}, {type(err)=}")
+    raise
+
+
+@app.route('/list_user/', methods=['GET', 'POST'])
+def list_user():
+    admin = Admin()
+    return render_template('list_user.html', users=admin.selectUser())
+
 
 @app.route('/monotoring/', methods=['GET', 'POST'])
 def monotoring():

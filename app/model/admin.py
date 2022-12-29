@@ -25,5 +25,10 @@ class Admin():
     def deleteUser(self):
         pass
 
+    def selectUser(self):
+        query = "SELECT u.name, u.lastname, r.name FROM user u, role r where u.role_id = r.id"
+        print(query)
+        return self.db.fetch(query)
+
     def getRole(self):
         return self.db .fetch('SELECT id,name FROM role', '')

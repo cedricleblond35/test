@@ -10,12 +10,7 @@ import mysql.connector
 
 class dbQuery():
     def __init__(self):
-        self.connection = mysql.connector.connect(
-            host="0.0.0.0",
-            port=3310,
-            user="root",
-            passwd="MYsql",
-            database="ASL")
+        self.connection = self.connectionDB()
 
     def query(self, sql, args):
         cursor = self.connection.cursor()
@@ -45,7 +40,7 @@ class dbQuery():
         cursor.close()
         return rowcount
 
-    def fetch(self, sql, args):
+    def fetch(self, sql, args = ""):
         rows = []
         cursor = self.query(sql, args)
         if cursor.with_rows:
@@ -78,5 +73,22 @@ class dbQuery():
         cursor.close()
         return row
 
+    def connectionDB(self):
+        try:
+            return mysql.connector.connect(
+            host="0.0.0.0",
+            port=3310,
+            user="root",
+            passwd="MYsql",
+            database="ASL")
+
+        except mysql.connector.Error as e:
+            print("Error code:", e.errno)         # error number
+            print("SQLSTATE value:", e.sqlstate) # SQLSTATE value
+            print("Error message:", e.msg)       # error message
+            print("Error:", e)                   # errno, sqlstate, msg values
+            s = str(e)
+            print("Error:", s)                   # errno, sqlstate, msg values
+    
     def __del__(self):
         self.connection.close()
