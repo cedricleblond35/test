@@ -13,8 +13,19 @@ class dbQuery():
         self.connection = self.connectionDB()
 
     def query(self, sql, args):
-        cursor = self.connection.cursor()
-        cursor.execute(sql, args)
+        try:
+            cursor = self.connection.cursor()
+            cursor.execute(sql, args)
+            
+        except mysql.connector.Error as e:
+            print("Error code:", e.errno)         # error number
+            print("SQLSTATE value:", e.sqlstate) # SQLSTATE value
+            print("Error message:", e.msg)       # error message
+            print("Error:", e)                   # errno, sqlstate, msg values
+            s = str(e)
+            print("Error:", s)                   # errno, sqlstate, msg values
+            
+        
         return cursor
 
     def insert(self, sql, args):
@@ -45,33 +56,24 @@ class dbQuery():
         cursor = self.query(sql, args)
         if cursor.with_rows:
             rows = cursor.fetchall()
-            print(rows)
         cursor.close()
         return rows
 
     def fetchone(self, sql, args):
         row = None
         cursor = self.query(sql, args)
-        print(cursor.with_rows)
-        print(cursor)
         if cursor.with_rows:
             row = cursor.fetchone()
-            print("row :", row)
-        
-        
-        for (name, lastname) in cursor:
-            print("name :", name, lastname)
-        
-        
-        
-        
-        
-        
-        
-        
-        
         cursor.close()
         return row
+    
+    def delete(self, sql, args):
+        cursor = self.query(sql, args)
+        rowcount = cursor.rowcount
+        self.connection.commit()
+        cursor.close()
+        return rowcount
+        
 
     def connectionDB(self):
         try:
