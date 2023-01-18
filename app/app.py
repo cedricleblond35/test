@@ -3,6 +3,9 @@
 import mysql.connector  # pip install mysql-connector-python
 # import pickle
 import requests
+import os
+from werkzeug.utils import secure_filename
+
 from camera import VideoCamera
 from model.admin import Admin
 from model.user import User
@@ -15,15 +18,21 @@ app = Flask(__name__)
 
 # monotoring
 dashboard.config.init_from(file='config.cfg')  # In order to configure the Dashboard with a configuration-file,
-# dashboard.bind(app) # add monotoring
+dashboard.bind(app) # add monotoring
 
+#session
 app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
-
 s = requests.Session()
 
-
+#uploads files
+UPLOAD_FOLDER = './uploads'
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+def allowed_file(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 def gen(camera):
     while True:
@@ -61,6 +70,23 @@ def video_feed():
 def deconnection():
     session.clear()
     return render_template('deconnection.html')
+
+@app.route('/lessons')
+def lessons():
+    return render_template('lessons.html', variable='A.jpg')
+
+
+@app.route('/upload', methods=['GET', 'POST'])
+def upload_file():
+    if request.method == 'POST':
+        file = request.files['file']
+        if file.filename == '':
+            return redirect(request.url)
+        if file and allowed_file(file.filename):
+            filename = secure_filename(file.filename)
+            file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+            render_template('create_user.html',  name=filename)
+    return render_template('upload.html')
 
 
 @app.route('/login/', methods=['GET', 'POST'])
